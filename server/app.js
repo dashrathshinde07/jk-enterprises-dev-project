@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const heroRoutes = require("./routes/heroRoutes");
+const sectionItemRoutes = require("./routes/sectionItemRoutes");
+const promoBannerRoutes = require("./routes/promoBannerRoutes");
 
 const app = express();
 
@@ -10,6 +12,10 @@ app.use(express.json());
 
 // Routes
 app.use("/api/hero", heroRoutes); // ✅ Hero route mapping
+app.use("/api/section-item", sectionItemRoutes);
+
+app.use("/api/promo-banner/homepage", promoBannerRoutes);
+
 
 // Default route
 app.get("/", (req, res) => {

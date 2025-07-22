@@ -1,115 +1,183 @@
 const Product = require("../models/Product");
+const cloudinary = require("../config/cloudinary");
 
-// CREATE Product
 exports.createProduct = async (req, res) => {
   try {
     const {
-      name_en,
-      name_mr,
+      nameEn,
+      nameMr,
+      slug,
+      category,
+      productDescription,
+      tags,
+      searchableKeywords,
       sku,
       mrp,
       sellingPrice,
       brand,
-      category,
-      tags,
-      searchKeywords,
-      images,
-      slug,
+      stock,
+      warranty,
+      dimensions,
+      logisticsInfo,
+      url,
     } = req.body;
 
-    if (
-      !name_en ||
-      !name_mr ||
-      !images ||
-      !sellingPrice ||
-      !category ||
-      !slug
-    ) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
+    const imageFiles = req.files || [];
+    const imageUploadResults = await Promise.all(
+      imageFiles.map((file) =>
+        cloudinary.uploader.upload(file.path).then((result) => ({
+          url: result.secure_url,
+          publicId: result.public_id,
+        }))
+      )
+    );
 
-    const product = await Product.create({
-      name_en,
-      name_mr,
+    const newProduct = new Product({
+      nameEn,
+      nameMr,
+      slug,
+      category,
+      productDescription,
+      tags: tags?.split(","),
+      searchableKeywords: searchableKeywords?.split(","),
       sku,
       mrp,
       sellingPrice,
       brand,
-      category,
-      tags,
-      searchKeywords,
-      images,
-      slug,
+      stock,
+      warranty,
+      dimensions,
+      logisticsInfo,
+      url,
+      images: imageUploadResults,
     });
 
-    res.status(201).json({ message: "Product created", product });
+    await newProduct.save();
+    res.status(201).json(newProduct);
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Create Product Error:", error);
+    res.status(500).json({ message: "Failed to create product" });
   }
 };
 
-// UPDATE Product
 exports.updateProduct = async (req, res) => {
   try {
-    const productId = req.params.id;
+    const { id } = req.params;
+    const product = await Product.findById(id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
 
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      { $set: req.body },
-      { new: true }
-    );
+    const {
+      nameEn,
+      nameMr,
+      slug,
+      category,
+      productDescription,
+      tags,
+      searchableKeywords,
+      sku,
+      mrp,
+      sellingPrice,
+      brand,
+      stock,
+      warranty,
+      dimensions,
+      logisticsInfo,
+      url,
+    } = req.body;
 
-    if (!updatedProduct) {
-      return res.status(404).json({ message: "Product not found" });
+    // Delete old images if new ones are uploaded
+    if (req.files?.length) {
+      for (const img of product.images) {
+        if (img.publicId) await cloudinary.uploader.destroy(img.publicId);
+      }
     }
 
-    res
-      .status(200)
-      .json({ message: "Product updated", product: updatedProduct });
+    const uploadedImages = req.files?.length
+      ? await Promise.all(
+          req.files.map((file) =>
+            cloudinary.uploader.upload(file.path).then((result) => ({
+              url: result.secure_url,
+              publicId: result.public_id,
+            }))
+          )
+        )
+      : product.images;
+
+    const updatedData = {
+      nameEn: nameEn ?? product.nameEn,
+      nameMr: nameMr ?? product.nameMr,
+      slug: slug ?? product.slug,
+      category: category ?? product.category,
+      productDescription: productDescription ?? product.productDescription,
+      tags: tags ? tags.split(",") : product.tags,
+      searchableKeywords: searchableKeywords
+        ? searchableKeywords.split(",")
+        : product.searchableKeywords,
+      sku: sku ?? product.sku,
+      mrp: mrp ?? product.mrp,
+      sellingPrice: sellingPrice ?? product.sellingPrice,
+      brand: brand ?? product.brand,
+      stock: stock ?? product.stock,
+      warranty: warranty ?? product.warranty,
+      dimensions: dimensions ?? product.dimensions,
+      logisticsInfo: logisticsInfo ?? product.logisticsInfo,
+      url: url ?? product.url,
+      images: uploadedImages,
+    };
+
+    const updatedProduct = await Product.findByIdAndUpdate(id, updatedData, {
+      new: true,
+    });
+
+    res.json(updatedProduct);
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Update Product Error:", error);
+    res.status(500).json({ message: "Failed to update product" });
   }
 };
 
-// SOFT DELETE Product
 exports.softDeleteProduct = async (req, res) => {
   try {
-    const productId = req.params.id;
+    const { id } = req.params;
+    const product = await Product.findById(id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
 
-    const deletedProduct = await Product.findByIdAndUpdate(
-      productId,
-      { isArchived: true },
-      { new: true }
-    );
-
-    if (!deletedProduct) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    res
-      .status(200)
-      .json({ message: "Product soft deleted", product: deletedProduct });
+    product.archive = true;
+    await product.save();
+    res.json({ message: "Product soft deleted" });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Soft Delete Product Error:", error);
+    res.status(500).json({ message: "Failed to archive product" });
   }
 };
 
-// GET Product by ID
+exports.getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ archive: false })
+      .populate("category")
+      .populate("productDescription")
+      .populate("ratings")
+      .sort({ createdAt: -1 });
+    res.json(products);
+  } catch (error) {
+    console.error("Get Products Error:", error);
+    res.status(500).json({ message: "Failed to fetch products" });
+  }
+};
+
 exports.getProductById = async (req, res) => {
   try {
-    const productId = req.params.id;
-
-    const product = await Product.findById(productId)
+    const { id } = req.params;
+    const product = await Product.findById(id)
       .populate("category")
-      .populate("description")
+      .populate("productDescription")
       .populate("ratings");
 
-    if (!product || product.isArchived) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+    if (!product) return res.status(404).json({ message: "Product not found" });
 
-    res.status(200).json(product);
+    res.json(product);
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("Get Product By ID Error:", error);
+    res.status(500).json({ message: "Failed to fetch product" });
   }
 };

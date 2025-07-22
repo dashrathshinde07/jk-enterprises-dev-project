@@ -5,6 +5,7 @@ const upload = require("../middleware/upload"); // Multer middleware
 const {
   createTrendingProduct,
   getTrendingProducts,
+  getTrendingProductById,
   updateTrendingProduct,
   deleteTrendingProduct,
 } = require("../controllers/trendingProductController");
@@ -16,6 +17,10 @@ router.post("/", upload.single("image"), createTrendingProduct);
 // @route   GET /api/trending-products
 // @desc    Get all trending products
 router.get("/", getTrendingProducts);
+
+// @route   GET /api/trending-products/:id
+// @desc    Get single trending product by ID
+router.get("/:id", getTrendingProductById);
 
 // @route   PUT /api/trending-products/:id
 // @desc    Update a trending product

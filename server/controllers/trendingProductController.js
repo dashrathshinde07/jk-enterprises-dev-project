@@ -4,24 +4,40 @@ const {
   deleteImageFromCloudinary,
 } = require("../utils/cloudinaryOperations");
 
-// CREATE
+// ✅ CREATE
 exports.createTrendingProduct = async (req, res) => {
   try {
+    const {
+      title_en,
+      title_mr,
+      category_en,
+      category_mr,
+      description_en,
+      description_mr,
+      buttonText_en,
+      buttonText_mr,
+      maxCapacity,
+      isFeatured,
+    } = req.body;
+
     if (!req.file) {
-      return res.status(400).json({ message: "No image file uploaded" });
+      return res.status(400).json({ message: "Image is required" });
     }
 
     const { url, public_id } = await uploadImageToCloudinary(req.file.path);
 
     const product = new TrendingProduct({
-      title: req.body.title,
-      category: req.body.category,
-      description: req.body.description,
+      title: { en: title_en, mr: title_mr },
+      category: { en: category_en, mr: category_mr },
+      description: { en: description_en, mr: description_mr },
+      buttonText: {
+        en: buttonText_en || "View Details",
+        mr: buttonText_mr || "तपशील पाहा",
+      },
       imageUrl: url,
       cloudinaryId: public_id,
-      buttonText: req.body.buttonText || "View Details",
-      maxCapacity: req.body.maxCapacity,
-      isFeatured: req.body.isFeatured ?? true,
+      maxCapacity,
+      isFeatured: isFeatured ?? true,
     });
 
     await product.save();
@@ -31,7 +47,7 @@ exports.createTrendingProduct = async (req, res) => {
   }
 };
 
-// READ - Get All
+// ✅ READ - Get All
 exports.getTrendingProducts = async (req, res) => {
   try {
     const products = await TrendingProduct.find().sort({ createdAt: -1 });
@@ -41,7 +57,18 @@ exports.getTrendingProducts = async (req, res) => {
   }
 };
 
-// UPDATE
+// ✅ READ - Get Single Product by ID
+exports.getTrendingProductById = async (req, res) => {
+  try {
+    const product = await TrendingProduct.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching product", error });
+  }
+};
+
+// ✅ UPDATE
 exports.updateTrendingProduct = async (req, res) => {
   try {
     const product = await TrendingProduct.findById(req.params.id);
@@ -57,10 +84,26 @@ exports.updateTrendingProduct = async (req, res) => {
       product.cloudinaryId = public_id;
     }
 
-    product.title = req.body.title || product.title;
-    product.category = req.body.category || product.category;
-    product.description = req.body.description || product.description;
-    product.buttonText = req.body.buttonText || product.buttonText;
+    product.title = {
+      en: req.body.title_en || product.title.en,
+      mr: req.body.title_mr || product.title.mr,
+    };
+
+    product.category = {
+      en: req.body.category_en || product.category.en,
+      mr: req.body.category_mr || product.category.mr,
+    };
+
+    product.description = {
+      en: req.body.description_en || product.description.en,
+      mr: req.body.description_mr || product.description.mr,
+    };
+
+    product.buttonText = {
+      en: req.body.buttonText_en || product.buttonText.en,
+      mr: req.body.buttonText_mr || product.buttonText.mr,
+    };
+
     product.maxCapacity = req.body.maxCapacity || product.maxCapacity;
     product.isFeatured = req.body.isFeatured ?? product.isFeatured;
 
@@ -71,7 +114,7 @@ exports.updateTrendingProduct = async (req, res) => {
   }
 };
 
-// DELETE
+// ✅ DELETE
 exports.deleteTrendingProduct = async (req, res) => {
   try {
     const product = await TrendingProduct.findById(req.params.id);

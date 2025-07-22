@@ -3,16 +3,16 @@ const mongoose = require("mongoose");
 const promoBannerSchema = new mongoose.Schema(
   {
     title: {
-      type: String,
-      required: true,
+      en: { type: String, required: true },
+      mr: { type: String, required: true },
     },
     subtitle: {
-      type: String,
-      required: true,
+      en: { type: String, required: true },
+      mr: { type: String, required: true },
     },
     tagline: {
-      type: String,
-      required: false,
+      en: { type: String },
+      mr: { type: String },
     },
     imageUrl: {
       type: String,
@@ -23,8 +23,8 @@ const promoBannerSchema = new mongoose.Schema(
       required: true,
     },
     ctaText: {
-      type: String,
-      default: null, // optional call to action
+      en: { type: String, default: null },
+      mr: { type: String, default: null },
     },
     ctaLink: {
       type: String,

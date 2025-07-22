@@ -4,11 +4,18 @@ const {
   deleteImageFromCloudinary,
 } = require("../utils/cloudinaryOperations");
 
-// Create a new entry
+// ✅ Create a new entry
 exports.createWhyChooseUs = async (req, res) => {
   try {
+    const {
+      title_en,
+      title_mr,
+      description_en,
+      description_mr,
+    } = req.body;
+
     if (!req.file) {
-      return res.status(400).json({ message: "No image file uploaded" });
+      return res.status(400).json({ message: "Image is required" });
     }
 
     const { url, public_id } = await uploadImageToCloudinary(
@@ -17,93 +24,114 @@ exports.createWhyChooseUs = async (req, res) => {
     );
 
     const newEntry = await WhyChooseUs.create({
-      title: req.body.title,
-      description: req.body.description,
+      title: { en: title_en, mr: title_mr },
+      description: { en: description_en, mr: description_mr },
       iconUrl: url,
       cloudinaryId: public_id,
     });
 
     res.status(201).json(newEntry);
   } catch (error) {
-    console.error("Error while creating WhyChooseUs entry:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to create entry", error: error.message });
+    console.error("Create Error:", error);
+    res.status(500).json({ message: "Failed to create entry" });
   }
 };
 
-// Get all entries
+// ✅ Get all entries
 exports.getAllWhyChooseUs = async (req, res) => {
   try {
-    const data = await WhyChooseUs.find().sort({ createdAt: -1 }); // optional: latest first
+    const data = await WhyChooseUs.find().sort({ createdAt: -1 });
     res.status(200).json(data);
   } catch (error) {
-    console.error("Error while fetching WhyChooseUs entries:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to fetch data", error: error.message });
+    console.error("Fetch Error:", error);
+    res.status(500).json({ message: "Failed to fetch data" });
   }
 };
 
-// Update entry (image upload is optional)
-exports.updateWhyChooseUs = async (req, res) => {
+// ✅ Get single entry by ID
+exports.getWhyChooseUsById = async (req, res) => {
   try {
     const entry = await WhyChooseUs.findById(req.params.id);
     if (!entry) return res.status(404).json({ message: "Entry not found" });
 
-    let url = entry.iconUrl;
-    let public_id = entry.cloudinaryId;
-
-    if (req.file) {
-      // Delete old image
-      await deleteImageFromCloudinary(public_id);
-
-      // Upload new image
-      const result = await uploadImageToCloudinary(
-        req.file.path,
-        "whyChooseUs"
-      );
-      url = result.url;
-      public_id = result.public_id;
-    }
-
-    const updated = await WhyChooseUs.findByIdAndUpdate(
-      req.params.id,
-      {
-        title: req.body.title || entry.title,
-        description: req.body.description || entry.description,
-        iconUrl: url,
-        cloudinaryId: public_id,
-      },
-      { new: true }
-    );
-
-    res.status(200).json(updated);
+    res.status(200).json(entry);
   } catch (error) {
-    console.error("Error while updating WhyChooseUs entry:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to update entry", error: error.message });
+    console.error("Get by ID Error:", error);
+    res.status(500).json({ message: "Failed to get entry" });
   }
 };
 
-// Delete entry and its image
+// ✅ Update entry (optional image + language support)
+exports.updateWhyChooseUs = async (req, res) => {
+  try {
+    const {
+      title_en,
+      title_mr,
+      description_en,
+      description_mr,
+    } = req.body;
+
+    const entry = await WhyChooseUs.findById(req.params.id);
+    if (!entry) return res.status(404).json({ message: "Entry not found" });
+
+    let iconUrl = entry.iconUrl;
+    let cloudinaryId = entry.cloudinaryId;
+
+    // Replace image if uploaded
+    if (req.file) {
+      if (cloudinaryId) {
+        try {
+          await deleteImageFromCloudinary(cloudinaryId);
+        } catch (err) {
+          console.warn("Cloudinary delete warning:", err.message);
+        }
+      }
+
+      const newImage = await uploadImageToCloudinary(req.file.path, "whyChooseUs");
+      iconUrl = newImage.url;
+      cloudinaryId = newImage.public_id;
+    }
+
+    entry.title = {
+      en: title_en || entry.title.en,
+      mr: title_mr || entry.title.mr,
+    };
+
+    entry.description = {
+      en: description_en || entry.description.en,
+      mr: description_mr || entry.description.mr,
+    };
+
+    entry.iconUrl = iconUrl;
+    entry.cloudinaryId = cloudinaryId;
+
+    await entry.save();
+
+    res.status(200).json(entry);
+  } catch (error) {
+    console.error("Update Error:", error);
+    res.status(500).json({ message: "Failed to update entry" });
+  }
+};
+
+// ✅ Delete entry and its Cloudinary image
 exports.deleteWhyChooseUs = async (req, res) => {
   try {
     const entry = await WhyChooseUs.findById(req.params.id);
     if (!entry) return res.status(404).json({ message: "Entry not found" });
 
-    // Delete image from Cloudinary
-    await deleteImageFromCloudinary(entry.cloudinaryId);
+    if (entry.cloudinaryId) {
+      try {
+        await deleteImageFromCloudinary(entry.cloudinaryId);
+      } catch (err) {
+        console.warn("Cloudinary delete warning:", err.message);
+      }
+    }
 
-    // Delete from DB
     await entry.deleteOne();
-
     res.status(200).json({ message: "Entry deleted successfully" });
   } catch (error) {
-    console.error("Error while deleting WhyChooseUs entry:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to delete entry", error: error.message });
+    console.error("Delete Error:", error);
+    res.status(500).json({ message: "Failed to delete entry" });
   }
 };

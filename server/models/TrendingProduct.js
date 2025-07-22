@@ -3,16 +3,16 @@ const mongoose = require("mongoose");
 const trendingProductSchema = new mongoose.Schema(
   {
     title: {
-      type: String,
-      required: true,
+      en: { type: String, required: true },
+      mr: { type: String, required: true },
     },
     category: {
-      type: String,
-      required: true,
+      en: { type: String, required: true },
+      mr: { type: String, required: true },
     },
     description: {
-      type: String,
-      required: true,
+      en: { type: String, required: true },
+      mr: { type: String, required: true },
     },
     imageUrl: {
       type: String,
@@ -23,8 +23,8 @@ const trendingProductSchema = new mongoose.Schema(
       required: true,
     },
     buttonText: {
-      type: String,
-      default: "View Details",
+      en: { type: String, default: "View Details" },
+      mr: { type: String, default: "तपशील पाहा" },
     },
     maxCapacity: {
       type: String, // e.g., "300kg"

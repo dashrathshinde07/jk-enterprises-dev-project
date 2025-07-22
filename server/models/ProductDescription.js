@@ -1,26 +1,20 @@
-// models/ProductDescription.js
-
 const mongoose = require("mongoose");
 
-const contentBlockSchema = new mongoose.Schema({
+const BlockSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ["text", "image", "bullet", "video", "imageText"],
+    enum: ["text", "image", "video", "bullet", "imageText"],
     required: true,
   },
-  enText: { type: String },
-  mrText: { type: String },
-  image: { type: String }, // Cloudinary URL
-  points: [
-    {
-      en: { type: String },
-      mr: { type: String },
-    },
-  ],
-  videoUrl: { type: String },
+  text: String,
+  image: String, // Cloudinary URL
+  videoUrl: String,
+  bullets: [String],
+  enText: String,
+  mrText: String,
 });
 
-const productDescriptionSchema = new mongoose.Schema(
+const ProductDescriptionSchema = new mongoose.Schema(
   {
     product: {
       type: mongoose.Schema.Types.ObjectId,
@@ -28,9 +22,9 @@ const productDescriptionSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    blocks: [contentBlockSchema],
+    blocks: [BlockSchema],
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("ProductDescription", productDescriptionSchema);
+module.exports = mongoose.model("ProductDescription", ProductDescriptionSchema);

@@ -30,7 +30,7 @@ app.use("/api/footer/", footer);
 
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
-app.use("/api", productDescriptionRoutes);
+app.use("/api/product", productDescriptionRoutes);
 
 // Default route
 app.get("/", (req, res) => {

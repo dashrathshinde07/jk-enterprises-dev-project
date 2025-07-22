@@ -1,32 +1,37 @@
-// controllers/productDescriptionController.js
 const ProductDescription = require("../models/ProductDescription");
 const cloudinary = require("../config/cloudinary");
 
-// Helper to handle uploading image blocks to Cloudinary
+// Upload image blocks to Cloudinary
 const uploadImages = async (blocks) => {
-  const uploadedBlocks = await Promise.all(
+  const updatedBlocks = await Promise.all(
     blocks.map(async (block) => {
-      if (block.type === "image" || block.type === "imageText") {
-        if (block.image && typeof block.image !== "string") {
-          const result = await cloudinary.uploader.upload(block.image, {
-            folder: "product-descriptions",
-          });
-          block.image = result.secure_url;
-        }
+      if (
+        (block.type === "image" || block.type === "imageText") &&
+        block.image &&
+        !block.image.startsWith("http")
+      ) {
+        const upload = await cloudinary.uploader.upload(block.image, {
+          folder: "product-descriptions",
+        });
+        block.image = upload.secure_url;
       }
       return block;
     })
   );
-  return uploadedBlocks;
+  return updatedBlocks;
 };
 
-// Create or update product description
 exports.createOrUpdateProductDescription = async (req, res) => {
   try {
     const { productId } = req.params;
     let { blocks } = req.body;
 
-    // Handle Cloudinary upload
+    if (!blocks || !Array.isArray(blocks)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Blocks array is required" });
+    }
+
     blocks = await uploadImages(blocks);
 
     const existing = await ProductDescription.findOne({ product: productId });
@@ -49,7 +54,6 @@ exports.createOrUpdateProductDescription = async (req, res) => {
   }
 };
 
-// Get product description
 exports.getProductDescription = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -70,7 +74,6 @@ exports.getProductDescription = async (req, res) => {
   }
 };
 
-// Delete product description
 exports.deleteProductDescription = async (req, res) => {
   try {
     const { productId } = req.params;

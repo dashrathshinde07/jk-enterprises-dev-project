@@ -5,6 +5,7 @@ const sectionItemRoutes = require("./routes/sectionItemRoutes");
 const promoBannerRoutes = require("./routes/promoBannerRoutes");
 const whyChooseUsRoutes = require("./routes/whyChooseUsRoutes");
 const trendingProductRoutes = require("./routes/trendingProductRoutes");
+const footer = require("./routes/footer");
 
 const app = express();
 
@@ -21,6 +22,8 @@ app.use("/api/promo-banner/homepage", promoBannerRoutes);
 app.use("/api/why-choose-us", whyChooseUsRoutes);
 
 app.use("/api/trending-products", trendingProductRoutes);
+
+app.use("/api/footer/", footer);
 
 // Default route
 app.get("/", (req, res) => {

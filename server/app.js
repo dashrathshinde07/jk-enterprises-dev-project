@@ -7,6 +7,7 @@ const whyChooseUsRoutes = require("./routes/whyChooseUsRoutes");
 const trendingProductRoutes = require("./routes/trendingProductRoutes");
 const footer = require("./routes/footer");
 const categoryRoutes = require("./routes/categoryRoutes");
+const productRoutes = require("./routes/productRoutes");
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/api/trending-products", trendingProductRoutes);
 app.use("/api/footer/", footer);
 
 app.use("/api/categories", categoryRoutes);
+app.use("/api/products", productRoutes);
 
 // Default route
 app.get("/", (req, res) => {

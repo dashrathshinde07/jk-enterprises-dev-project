@@ -8,6 +8,7 @@ const trendingProductRoutes = require("./routes/trendingProductRoutes");
 const footer = require("./routes/footer");
 const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
+const productDescriptionRoutes = require("./routes/productDescriptionRoutes");
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/api/footer/", footer);
 
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api", productDescriptionRoutes);
 
 // Default route
 app.get("/", (req, res) => {

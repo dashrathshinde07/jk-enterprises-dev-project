@@ -215,3 +215,72 @@ exports.filterProducts = async (req, res) => {
     res.status(500).json({ message: "Failed to filter products" });
   }
 };
+
+// controllers/productDescriptionController.js
+
+// controllers/productDescriptionController.js
+
+const ProductDescription = require("../models/ProductDescription");
+
+exports.createProductDescription = async (req, res) => {
+  try {
+    const { productId, blocks } = req.body;
+
+    if (!productId || !Array.isArray(blocks)) {
+      return res
+        .status(400)
+        .json({ error: "productId and blocks are required." });
+    }
+
+    const existing = await ProductDescription.findOne({ productId });
+
+    if (existing) {
+      return res
+        .status(400)
+        .json({ error: "Description already exists for this product." });
+    }
+
+    const description = await ProductDescription.create({ productId, blocks });
+
+    res
+      .status(201)
+      .json({
+        message: "Product description created successfully.",
+        description,
+      });
+  } catch (error) {
+    console.error("Error creating product description:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.updateProductDescription = async (req, res) => {
+  try {
+    const { productId, blocks } = req.body;
+
+    if (!productId || !Array.isArray(blocks)) {
+      return res
+        .status(400)
+        .json({ error: "productId and blocks are required." });
+    }
+
+    const existing = await ProductDescription.findOne({ productId });
+
+    if (!existing) {
+      return res.status(404).json({ error: "Product description not found." });
+    }
+
+    existing.blocks = blocks;
+    await existing.save();
+
+    res
+      .status(200)
+      .json({
+        message: "Product description updated successfully.",
+        description: existing,
+      });
+  } catch (error) {
+    console.error("Error updating product description:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};

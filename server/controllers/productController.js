@@ -181,3 +181,37 @@ exports.getProductById = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch product" });
   }
 };
+// controllers/productController.js
+
+exports.filterProducts = async (req, res) => {
+  try {
+    const { minPrice, maxPrice, search } = req.query;
+
+    let filter = {
+      archive: false,
+    };
+
+    if (minPrice || maxPrice) {
+      filter.sellingPrice = {};
+      if (minPrice) filter.sellingPrice.$gte = Number(minPrice);
+      if (maxPrice) filter.sellingPrice.$lte = Number(maxPrice);
+    }
+
+    if (search) {
+      const regex = new RegExp(search, "i"); // case-insensitive
+      filter.$or = [
+        { englishName: regex },
+        { marathiName: regex },
+        { brand: regex },
+        { tags: regex },
+        { searchableKeywords: regex },
+      ];
+    }
+
+    const products = await Product.find(filter).sort({ createdAt: -1 });
+    res.json(products);
+  } catch (error) {
+    console.error("Filter Products Error:", error);
+    res.status(500).json({ message: "Failed to filter products" });
+  }
+};

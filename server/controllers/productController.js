@@ -242,12 +242,10 @@ exports.createProductDescription = async (req, res) => {
 
     const description = await ProductDescription.create({ productId, blocks });
 
-    res
-      .status(201)
-      .json({
-        message: "Product description created successfully.",
-        description,
-      });
+    res.status(201).json({
+      message: "Product description created successfully.",
+      description,
+    });
   } catch (error) {
     console.error("Error creating product description:", error);
     res.status(500).json({ error: "Server error" });
@@ -273,12 +271,10 @@ exports.updateProductDescription = async (req, res) => {
     existing.blocks = blocks;
     await existing.save();
 
-    res
-      .status(200)
-      .json({
-        message: "Product description updated successfully.",
-        description: existing,
-      });
+    res.status(200).json({
+      message: "Product description updated successfully.",
+      description: existing,
+    });
   } catch (error) {
     console.error("Error updating product description:", error);
     res.status(500).json({ error: "Server error" });

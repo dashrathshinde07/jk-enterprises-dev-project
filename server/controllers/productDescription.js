@@ -32,7 +32,7 @@ exports.createOrUpdateProductDescription = async (req, res) => {
         .json({ success: false, message: "Blocks array is required" });
     }
 
-    blocks = await uploadImages(blocks);
+    // blocks = await uploadImages(blocks);
 
     const existing = await ProductDescription.findOne({ product: productId });
 

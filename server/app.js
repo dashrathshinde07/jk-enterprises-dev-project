@@ -10,6 +10,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
 const productDescriptionRoutes = require("./routes/productDescriptionRoutes");
 const reviews = require("./routes/reviews");
+const blogRoutes = require("./routes/blogRoutes");
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/product", productDescriptionRoutes);
 app.use("/api/reviews", reviews);
+app.use("/api/blogs", blogRoutes);
 
 // Default route
 app.get("/", (req, res) => {

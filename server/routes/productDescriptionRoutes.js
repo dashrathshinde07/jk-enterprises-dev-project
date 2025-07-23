@@ -1,17 +1,23 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("../middleware/upload");
 const {
   createOrUpdateProductDescription,
-  getProductDescription,
-  deleteProductDescription,
+  getProductDescriptionByProductId,
+  deleteProductDescriptionBlock,
 } = require("../controllers/productDescription");
-const upload = require("../middleware/upload");
 
+// Create or Update Description (supports file upload)
 router.post(
-  "/product-description",
-  upload.array("images", 10), // 'images' key from Postman or frontend
+  "/:productId",
+  upload.array("images"),
   createOrUpdateProductDescription
 );
-// router.delete("/description/:productId", deleteProductDescription);
+
+// Get description by product ID
+router.get("/:productId", getProductDescriptionByProductId);
+
+// Delete a specific block from the product description
+router.delete("/:productId/block/:blockId", deleteProductDescriptionBlock);
 
 module.exports = router;

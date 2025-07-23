@@ -8,10 +8,9 @@ const trendingProductRoutes = require("./routes/trendingProductRoutes");
 const footer = require("./routes/footer");
 const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
-const productDescriptionRoutes = require("./routes/productDescriptionRoutes");
 const reviews = require("./routes/reviews");
 const blogRoutes = require("./routes/blogRoutes");
-
+const productDescriptionRoutes = require("./routes/productDescriptionRoutes");
 const app = express();
 
 // Middleware
@@ -29,10 +28,10 @@ app.use("/api/why-choose-us", whyChooseUsRoutes);
 app.use("/api/trending-products", trendingProductRoutes);
 
 app.use("/api/footer", footer);
+app.use("/api/product-description", productDescriptionRoutes);
 
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
-app.use("/api/product", productDescriptionRoutes);
 app.use("/api/reviews", reviews);
 app.use("/api/blogs", blogRoutes);
 

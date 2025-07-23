@@ -9,8 +9,8 @@ const {
 
 // Create or Update Description (supports file upload)
 router.post(
-  "/:productId",
-  upload.array("images"),
+  "/product-description/:productId",
+  upload.array("images", 10), // expecting 'images' field
   createOrUpdateProductDescription
 );
 

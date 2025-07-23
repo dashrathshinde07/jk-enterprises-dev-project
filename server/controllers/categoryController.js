@@ -14,6 +14,7 @@ exports.createCategory = async (req, res) => {
       isFeatured,
       order,
       createdBy,
+      parentEntity, // 👈 Add this
     } = req.body;
 
     let imageData = {};
@@ -33,6 +34,8 @@ exports.createCategory = async (req, res) => {
       isFeatured,
       order,
       createdBy,
+      parentEntity, // 👈 Assign it
+
       ...imageData,
     });
 
@@ -119,10 +122,25 @@ exports.archiveCategory = async (req, res) => {
 // GET all categories (not archived)
 exports.getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ archive: false }).sort({ createdAt: -1 });
+    const categories = await Category.find({ archive: false }).sort({
+      createdAt: -1,
+    });
     res.json(categories);
   } catch (error) {
     console.error("Get All Categories Error:", error);
+    res.status(500).json({ message: "Failed to fetch categories" });
+  }
+};
+exports.getByParentEntity = async (req, res) => {
+  try {
+    const categories = await Category.find({
+      parentEntity: req.params.parentId,
+      archive: false,
+    }).sort({ createdAt: -1 });
+
+    res.json(categories);
+  } catch (error) {
+    console.error("Fetch by parent entity error:", error);
     res.status(500).json({ message: "Failed to fetch categories" });
   }
 };

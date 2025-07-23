@@ -51,6 +51,11 @@ const categorySchema = new mongoose.Schema(
       type: Boolean,
       default: false, // Soft delete flag
     },
+    parentEntity: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ParentEntity",
+      required: true,
+    },
   },
   {
     timestamps: true,

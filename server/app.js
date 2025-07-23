@@ -10,7 +10,6 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
 const reviews = require("./routes/reviews");
 const blogRoutes = require("./routes/blogRoutes");
-const productDescriptionRoutes = require("./routes/productDescriptionRoutes");
 const app = express();
 
 // Middleware
@@ -28,12 +27,12 @@ app.use("/api/why-choose-us", whyChooseUsRoutes);
 app.use("/api/trending-products", trendingProductRoutes);
 
 app.use("/api/footer", footer);
-app.use("/api/product-description", productDescriptionRoutes);
 
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/reviews", reviews);
 app.use("/api/blogs", blogRoutes);
+app.use("/api/parent-entities", parentEntityRoutes);
 
 // Default route
 app.get("/", (req, res) => {

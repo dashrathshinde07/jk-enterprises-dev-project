@@ -10,6 +10,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
 const reviews = require("./routes/reviews");
 const blogRoutes = require("./routes/blogRoutes");
+const parentEntityRoutes = require("./routes/parentEntityRoutes");
 const app = express();
 
 // Middleware

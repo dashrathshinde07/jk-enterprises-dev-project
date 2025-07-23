@@ -12,6 +12,6 @@ router.post(
   upload.array("images", 10), // 'images' key from Postman or frontend
   createOrUpdateProductDescription
 );
-router.delete("/description/:productId", deleteProductDescription);
+// router.delete("/description/:productId", deleteProductDescription);
 
 module.exports = router;

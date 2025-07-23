@@ -20,6 +20,7 @@ exports.createProduct = async (req, res) => {
       dimensions,
       logisticsInfo,
       url,
+      weightCapacity,
     } = req.body;
 
     const imageFiles = req.files || [];
@@ -49,6 +50,7 @@ exports.createProduct = async (req, res) => {
       dimensions,
       logisticsInfo,
       url,
+      weightCapacity,
       images: imageUploadResults,
     });
 
@@ -83,6 +85,7 @@ exports.updateProduct = async (req, res) => {
       dimensions,
       logisticsInfo,
       url,
+      weightCapacity,
     } = req.body;
 
     // Delete old images if new ones are uploaded
@@ -123,6 +126,7 @@ exports.updateProduct = async (req, res) => {
       logisticsInfo: logisticsInfo ?? product.logisticsInfo,
       url: url ?? product.url,
       images: uploadedImages,
+      weightCapacity: weightCapacity ?? product.weightCapacity,
     };
 
     const updatedProduct = await Product.findByIdAndUpdate(id, updatedData, {
@@ -185,98 +189,89 @@ exports.getProductById = async (req, res) => {
 
 exports.filterProducts = async (req, res) => {
   try {
-    const { minPrice, maxPrice, search } = req.query;
+    const {
+      minPrice,
+      maxPrice,
+      search,
+      weightCapacity,
+      page = 1,
+      pageSize = 10,
+    } = req.query;
 
-    let filter = {
+    const filter = {
       archive: false,
     };
 
+    // 💰 Price range filter
     if (minPrice || maxPrice) {
       filter.sellingPrice = {};
       if (minPrice) filter.sellingPrice.$gte = Number(minPrice);
       if (maxPrice) filter.sellingPrice.$lte = Number(maxPrice);
     }
 
+    // ⚖️ Weight Capacity filter
+    if (weightCapacity) {
+      filter.weightCapacity = Number(weightCapacity);
+    }
+
+    // 🔍 Search filter
     if (search) {
       const regex = new RegExp(search, "i"); // case-insensitive
       filter.$or = [
-        { englishName: regex },
-        { marathiName: regex },
+        { nameEn: regex },
+        { nameMr: regex },
         { brand: regex },
         { tags: regex },
         { searchableKeywords: regex },
+        { slug: regex },
       ];
     }
 
-    const products = await Product.find(filter).sort({ createdAt: -1 });
-    res.json(products);
+    // 🔢 Pagination logic
+    const skip = (Number(page) - 1) * Number(pageSize);
+
+    // 📦 Fetch total for frontend
+    const total = await Product.countDocuments(filter);
+
+    // 📥 Fetch paginated results
+    const products = await Product.find(filter)
+      .populate("category")
+      .populate("productDescription")
+      .populate("ratings")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(pageSize));
+
+    res.json({
+      total,
+      page: Number(page),
+      pageSize: Number(pageSize),
+      totalPages: Math.ceil(total / pageSize),
+      products,
+    });
   } catch (error) {
     console.error("Filter Products Error:", error);
     res.status(500).json({ message: "Failed to filter products" });
   }
 };
 
-// controllers/productDescriptionController.js
-
-// controllers/productDescriptionController.js
-
-const ProductDescription = require("../models/ProductDescription");
-
-exports.createProductDescription = async (req, res) => {
+// Get all products under a specific category ID
+exports.getProductsByCategoryId = async (req, res) => {
   try {
-    const { productId, blocks } = req.body;
+    const { categoryId } = req.params;
 
-    if (!productId || !Array.isArray(blocks)) {
-      return res
-        .status(400)
-        .json({ error: "productId and blocks are required." });
-    }
+    const products = await Product.find({
+      category: categoryId,
+      archive: false,
+    })
+      .populate("category")
+      .populate("productDescription")
+      .populate("ratings")
+      .sort({ createdAt: -1 });
 
-    const existing = await ProductDescription.findOne({ productId });
-
-    if (existing) {
-      return res
-        .status(400)
-        .json({ error: "Description already exists for this product." });
-    }
-
-    const description = await ProductDescription.create({ productId, blocks });
-
-    res.status(201).json({
-      message: "Product description created successfully.",
-      description,
-    });
+    res.json(products);
   } catch (error) {
-    console.error("Error creating product description:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-};
-
-exports.updateProductDescription = async (req, res) => {
-  try {
-    const { productId, blocks } = req.body;
-
-    if (!productId || !Array.isArray(blocks)) {
-      return res
-        .status(400)
-        .json({ error: "productId and blocks are required." });
-    }
-
-    const existing = await ProductDescription.findOne({ productId });
-
-    if (!existing) {
-      return res.status(404).json({ error: "Product description not found." });
-    }
-
-    existing.blocks = blocks;
-    await existing.save();
-
-    res.status(200).json({
-      message: "Product description updated successfully.",
-      description: existing,
-    });
-  } catch (error) {
-    console.error("Error updating product description:", error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Get Products By Category ID Error:", error);
+    res.status(500).json({ message: "Failed to fetch products by category" });
   }
 };

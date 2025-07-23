@@ -9,5 +9,9 @@ router.patch("/archive/:id", productController.softDeleteProduct);
 router.get("/", productController.getAllProducts);
 router.get("/filter", productController.filterProducts);
 router.get("/:id", productController.getProductById);
+router.get(
+  "/by-category/:categoryId",
+  productController.getProductsByCategoryId
+);
 
 module.exports = router;

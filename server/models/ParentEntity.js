@@ -7,6 +7,11 @@ const parentEntitySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    marathiTItle: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     slug: {
       type: String,
       required: true,

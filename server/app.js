@@ -9,6 +9,7 @@ const footer = require("./routes/footer");
 const categoryRoutes = require("./routes/categoryRoutes");
 const productRoutes = require("./routes/productRoutes");
 const productDescriptionRoutes = require("./routes/productDescriptionRoutes");
+const reviews = require("./routes/reviews");
 
 const app = express();
 
@@ -26,11 +27,12 @@ app.use("/api/why-choose-us", whyChooseUsRoutes);
 
 app.use("/api/trending-products", trendingProductRoutes);
 
-app.use("/api/footer/", footer);
+app.use("/api/footer", footer);
 
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/product", productDescriptionRoutes);
+app.use("/api/reviews", reviews);
 
 // Default route
 app.get("/", (req, res) => {

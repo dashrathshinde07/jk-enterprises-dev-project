@@ -11,6 +11,8 @@ const productRoutes = require("./routes/productRoutes");
 const reviews = require("./routes/reviews");
 const blogRoutes = require("./routes/blogRoutes");
 const parentEntityRoutes = require("./routes/parentEntityRoutes");
+const productDescriptionRoutes = require("./routes/productDescriptionRoutes");
+
 const app = express();
 
 // Middleware
@@ -34,6 +36,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/reviews", reviews);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/parent-entities", parentEntityRoutes);
+app.use("/api/product-descriptions", productDescriptionRoutes);
 
 // Default route
 app.get("/", (req, res) => {

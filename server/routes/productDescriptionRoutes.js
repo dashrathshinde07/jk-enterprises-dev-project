@@ -1,23 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middleware/upload");
 const {
-  createOrUpdateProductDescription,
-  getProductDescriptionByProductId,
-  deleteProductDescriptionBlock,
+  createProductDescription,
+  updateProductDescription,
+  uploadDescriptionImages,
+  getDescriptionByProduct,
+  deleteProductDescription,
 } = require("../controllers/productDescription");
+const upload = require("../middleware/upload");
 
-// Create or Update Description (supports file upload)
-router.post(
-  "/product-description/:productId",
-  upload.array("images", 10), // expecting 'images' field
-  createOrUpdateProductDescription
-);
-
-// Get description by product ID
-router.get("/:productId", getProductDescriptionByProductId);
-
-// Delete a specific block from the product description
-router.delete("/:productId/block/:blockId", deleteProductDescriptionBlock);
+router.post("/", createProductDescription);
+router.put("/:id", updateProductDescription);
+router.post("/upload-images", upload.array("images"), uploadDescriptionImages);
+router.get("/:productId", getDescriptionByProduct);
+router.delete("/:id", deleteProductDescription);
 
 module.exports = router;

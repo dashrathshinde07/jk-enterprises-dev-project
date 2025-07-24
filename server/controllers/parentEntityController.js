@@ -2,16 +2,16 @@ const ParentEntity = require("../models/ParentEntity");
 
 // CREATE ParentEntity
 exports.createParentEntity = async (req, res) => {
+  console.log(" req.body", req.body);
   try {
-    const { title, marathiTItle, slug, description, status, image } = req.body;
+    const { title, marathiTitle, slug, description, status } = req.body;
 
     const newEntity = new ParentEntity({
       title,
-      marathiTItle,
+      marathiTitle,
       slug,
       description,
       status,
-      image,
     });
 
     await newEntity.save();

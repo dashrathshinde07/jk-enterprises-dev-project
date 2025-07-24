@@ -65,6 +65,15 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+          <Route
+          path="parentCategories"
+          element={
+            <ProtectedRoute>
+              <ParentEntityList />
+            </ProtectedRoute>
+          }
+        />
+        
         <Route
           path="products"
           element={

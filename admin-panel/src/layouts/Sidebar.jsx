@@ -19,6 +19,11 @@ const navItems = [
     icon: <LayoutDashboard size={18} />,
   },
   { path: "/blogs", label: "Blogs", icon: <FileText size={18} /> },
+  {
+    path: "/parent-entities",
+    label: "Parent Entities",
+    icon: <Layers size={18} />,
+  },
   { path: "/categories", label: "Categories", icon: <Layers size={18} /> },
   { path: "/products", label: "Products", icon: <ShoppingCart size={18} /> },
   { path: "/reviews", label: "Reviews", icon: <Star size={18} /> },
@@ -32,11 +37,6 @@ const navItems = [
     icon: <ShoppingCart size={18} />,
   },
   { path: "/why-choose-us", label: "Why Choose Us", icon: <Users size={18} /> },
-  {
-    path: "/parent-entities",
-    label: "Parent Entities",
-    icon: <Layers size={18} />,
-  },
 ];
 
 const Sidebar = () => {

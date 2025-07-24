@@ -1,12 +1,25 @@
 import React from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, FileText, ShoppingCart, Tag, Users, ChevronRight } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileText,
+  ShoppingCart,
+  Tag,
+  Users,
+  ChevronRight,
+} from "lucide-react";
 
 const menuItems = [
   { label: "Dashboard", icon: <LayoutDashboard size={18} />, to: "/" },
   { label: "Blogs", icon: <FileText size={18} />, to: "/blogs" },
   { label: "Products", icon: <ShoppingCart size={18} />, to: "/products" },
   { label: "Categories", icon: <Tag size={18} />, to: "/categories" },
+  {
+    label: "Parent Categories",
+    icon: <Tag size={18} />,
+    to: "/parentCategories",
+  },
+
   { label: "Reviews", icon: <Users size={18} />, to: "/reviews" },
   // You can add more: Hero, PromoBanner, Footer, etc.
 ];

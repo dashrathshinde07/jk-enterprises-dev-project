@@ -1,7 +1,7 @@
 import axios from "./axiosConfig";
 
-export const getAllCategories = () => axios.get("/category");
-export const getCategoryById = (id) => axios.get(`/category/${id}`);
+export const getAllCategories = () => axios.get("/categories");
+export const getCategoryById = (id) => axios.get(`/categories/${id}`);
 
 export const createCategory = (data) => {
   const formData = new FormData();
@@ -9,7 +9,7 @@ export const createCategory = (data) => {
   formData.append("title_en", data.title_en);
   formData.append("title_mr", data.title_mr);
   formData.append("parent", data.parent);
-  return axios.post("/category", formData);
+  return axios.post("/categories", formData);
 };
 
 export const updateCategory = (id, data) => {
@@ -18,10 +18,10 @@ export const updateCategory = (id, data) => {
   formData.append("title_en", data.title_en);
   formData.append("title_mr", data.title_mr);
   formData.append("parent", data.parent);
-  return axios.put(`/category/${id}`, formData);
+  return axios.put(`/categories/${id}`, formData);
 };
 
-export const deleteCategory = (id) => axios.delete(`/category/${id}`);
+export const deleteCategory = (id) => axios.delete(`/categories/${id}`);
 
 // ✅ Add this to fix the import issue
-export const archiveCategory = (id) => axios.patch(`/category/${id}/archive`);
+export const archiveCategory = (id) => axios.patch(`/categories/${id}/archive`);

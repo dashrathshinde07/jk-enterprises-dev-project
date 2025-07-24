@@ -7,7 +7,7 @@ const parentEntitySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    marathiTItle: {
+    marathiTitle: {
       type: String,
       required: true,
       trim: true,
@@ -22,9 +22,7 @@ const parentEntitySchema = new mongoose.Schema(
     description: {
       type: String,
     },
-    image: {
-      type: String,
-    },
+
     status: {
       type: String,
       enum: ["active", "inactive"],

@@ -13,6 +13,7 @@ const CategoryEdit = ({ data, onSuccess }) => {
     parentEntity: "",
   });
   const [parents, setParents] = useState([]);
+  console.log("parents", parents);
 
   useEffect(() => {
     if (data) {
@@ -25,7 +26,8 @@ const CategoryEdit = ({ data, onSuccess }) => {
     }
 
     getAllParentEntities().then((res) => {
-      setParents(res.data || res);
+      console.log("res,", res);
+      setParents(res || res);
     });
   }, [data]);
 
@@ -65,7 +67,7 @@ const CategoryEdit = ({ data, onSuccess }) => {
           <option value="">Select</option>
           {parents.map((p) => (
             <option key={p._id} value={p._id}>
-              {p.name}
+              {p.title}
             </option>
           ))}
         </select>
@@ -74,7 +76,10 @@ const CategoryEdit = ({ data, onSuccess }) => {
       <ImageUploader image={image} setImage={setImage} />
 
       <div className="text-right">
-        <button type="submit" className="bg-[#2C498D] text-white px-4 py-2 rounded">
+        <button
+          type="submit"
+          className="bg-[#2C498D] text-white px-4 py-2 rounded"
+        >
           Update
         </button>
       </div>

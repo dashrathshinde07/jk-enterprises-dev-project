@@ -1,27 +1,19 @@
-import axios from "./axiosConfig";
+// src/api/categoryApi.js
 
-export const getAllCategories = () => axios.get("/categories");
-export const getCategoryById = (id) => axios.get(`/categories/${id}`);
+import httpClient from "./axiosConfig";
 
-export const createCategory = (data) => {
-  const formData = new FormData();
-  formData.append("image", data.image);
-  formData.append("title_en", data.title_en);
-  formData.append("title_mr", data.title_mr);
-  formData.append("parent", data.parent);
-  return axios.post("/categories", formData);
-};
+// Create category (with image)
+export const createCategory = (formData) =>
+  httpClient.postFormData("/categories", formData);
 
-export const updateCategory = (id, data) => {
-  const formData = new FormData();
-  if (data.image) formData.append("image", data.image);
-  formData.append("title_en", data.title_en);
-  formData.append("title_mr", data.title_mr);
-  formData.append("parent", data.parent);
-  return axios.put(`/categories/${id}`, formData);
-};
+// Get all categories
+export const getAllCategories = () => httpClient.get("/categories");
 
-export const deleteCategory = (id) => axios.delete(`/categories/${id}`);
+// Delete a category
+export const deleteCategory = (id) => httpClient.delete(`/categories/${id}`);
 
-// ✅ Add this to fix the import issue
-export const archiveCategory = (id) => axios.patch(`/categories/${id}/archive`);
+// Update category
+export const updateCategory = (id, formData) =>
+  httpClient.putFormData(`/categories/${id}`, formData);
+export const archiveCategory = (id) =>
+  httpClient.patch(`/categories/${id}/archive`);

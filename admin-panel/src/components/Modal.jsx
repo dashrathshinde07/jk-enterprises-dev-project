@@ -1,18 +1,50 @@
-const Modal = ({ isOpen, onClose, title, children }) => {
-  if (!isOpen) return null;
+import { Dialog, Transition } from "@headlessui/react";
+import { Fragment } from "react";
+
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  maxWidth = "max-w-[60%]",
+}) => {
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-lg relative">
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-3 text-xl text-gray-500 hover:text-red-600"
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
         >
-          &times;
-        </button>
-        <h2 className="text-lg font-semibold mb-4">{title}</h2>
-        <div>{children}</div>
-      </div>
-    </div>
+          <div className="fixed inset-0 bg-black/50" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto flex items-center justify-center p-4">
+          <div
+            className={`w-full ${maxWidth} transform overflow-hidden rounded-lg bg-white p-6 text-left align-middle shadow-xl transition-all`}
+          >
+            <Dialog.Title
+              as="h3"
+              className="text-lg font-medium leading-6 text-gray-900 flex justify-between items-center"
+            >
+              {title}
+              <button
+                onClick={onClose}
+                className="text-gray-500 hover:text-red-500"
+              >
+                X
+              </button>
+            </Dialog.Title>
+            <div className="mt-4">{children}</div>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
   );
 };
+
 export default Modal;

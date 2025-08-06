@@ -58,6 +58,41 @@ exports.getReviewById = async (req, res) => {
   }
 };
 
+// ✅ UPDATE review by ID
+exports.updateReviewById = async (req, res) => {
+  try {
+    const { name, rating, reviewDate, reviewText_en, reviewText_mr } = req.body;
+
+    const review = await Review.findById(req.params.id);
+    if (!review) return res.status(404).json({ message: "Review not found" });
+
+    // If there's a new image, delete the old one and upload the new
+    if (req.file) {
+      if (review.cloudinaryId) {
+        await deleteImageFromCloudinary(review.cloudinaryId);
+      }
+      const result = await uploadImageToCloudinary(req.file.path, "reviews");
+      review.profileImage = result.secure_url;
+      review.cloudinaryId = result.public_id;
+    }
+
+    // Update other fields
+    review.name = name || review.name;
+    review.rating = rating || review.rating;
+    review.reviewDate = reviewDate || review.reviewDate;
+    review.reviewText = {
+      en: reviewText_en || review.reviewText.en,
+      mr: reviewText_mr || review.reviewText.mr,
+    };
+
+    const updatedReview = await review.save();
+    res.status(200).json(updatedReview);
+  } catch (err) {
+    console.error("Update Review Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // ✅ DELETE review (also deletes Cloudinary image)
 exports.deleteReview = async (req, res) => {
   try {

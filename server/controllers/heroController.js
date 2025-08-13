@@ -103,7 +103,6 @@ exports.updateHeroById = async (req, res) => {
 
     if (buttonLink) updatedData.buttonLink = buttonLink;
 
-    // Handle image replacement
     if (req.file) {
       if (hero.backgroundImagePublicId) {
         try {

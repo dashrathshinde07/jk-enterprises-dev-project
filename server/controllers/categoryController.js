@@ -17,6 +17,8 @@ exports.createCategory = async (req, res) => {
       parentEntity, // 👈 Add this
     } = req.body;
 
+
+
     let imageData = {};
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path);
@@ -55,6 +57,8 @@ exports.updateCategory = async (req, res) => {
     if (!category)
       return res.status(404).json({ message: "Category not found" });
 
+    console.log("Pradip Jedhe", req.body);
+
     const {
       englishTitle,
       marathiTitle,
@@ -64,6 +68,7 @@ exports.updateCategory = async (req, res) => {
       status,
       isFeatured,
       order,
+      parentEntity,
     } = req.body;
 
     const updatedData = {
@@ -75,6 +80,7 @@ exports.updateCategory = async (req, res) => {
       status: status ?? category.status,
       isFeatured: isFeatured ?? category.isFeatured,
       order: order ?? category.order,
+      parentEntity: parentEntity ?? category.parentEntity
     };
 
     // Replace image if new image provided

@@ -5,7 +5,6 @@ import { createCategory } from "../../api/categoryApi";
 import { toast } from "react-toastify";
 
 const CategoryForm = ({ onSuccess }) => {
-  const [loading, setLoading] = useState(false);
   const [parentEntities, setParentEntities] = useState([]);
   const [image, setImage] = useState(null);
 
@@ -15,7 +14,7 @@ const CategoryForm = ({ onSuccess }) => {
     watch,
     setValue,
     reset,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
       englishTitle: "",
@@ -59,219 +58,260 @@ const CategoryForm = ({ onSuccess }) => {
       random
     );
   };
-
   const onSubmit = async (data) => {
     if (!image) {
-      toast.error("Please upload an image");
+      toast.error("❌ Please upload an image");
       return;
     }
 
     try {
-      setLoading(true);
-      const formData = new FormData();
-      for (const key in data) {
-        formData.append(key, data[key]);
-      }
-      formData.append("image", image);
 
-      await createCategory(formData);
-      toast.success("Category created successfully!");
+      await createCategory({ ...data, image });
+
+      toast.success("✅ Category created successfully!");
       reset();
       setImage(null);
+
       if (onSuccess) onSuccess();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to create category");
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error("Error creating category:", error);
+
+      // Axios-style error response check
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(`❌ ${error.response.data.message}`);
+      } else if (error.message) {
+        toast.error(`❌ ${error.message}`);
+      } else {
+        toast.error('❌ Something went wrong while creating the category.');
+      }
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="w-full mx-auto bg-white p-4 rounded-xl shadow-md space-y-4 max-h-[90vh] overflow-y-auto"
-    >
-      <h2 className="text-lg font-semibold">Create Category</h2>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden max-h-[75vh] overflow-y-auto p-3">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* English Title */}
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            English Title *
-          </label>
-          <input
-            type="text"
-            {...register("englishTitle", {
-              required: "English Title is required",
-            })}
-            className="w-full border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          {errors.englishTitle && (
-            <p className="text-red-500 text-xs">
-              {errors.englishTitle.message}
-            </p>
-          )}
+        {/* Title Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Title</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Title (English) *</label>
+              <input
+                type="text"
+                {...register("englishTitle", {
+                  required: "English title is required",
+                  minLength: {
+                    value: 3,
+                    message: "Title must be at least 3 characters long"
+                  }
+                })}
+                className={`w-full border rounded px-3 py-2 ${errors.englishTitle ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="Enter title in english"
+              />
+              {errors.englishTitle && (
+                <p className="text-red-500 text-sm mt-1">{errors.englishTitle.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Title (मराठी) *</label>
+              <input
+                type="text"
+                {...register("marathiTitle", {
+                  required: "Marathi title is required",
+                  minLength: {
+                    value: 3,
+                    message: "Title must be at least 3 characters long"
+                  }
+                })}
+                className={`w-full border rounded px-3 py-2 ${errors.marathiTitle ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="मराठीत शीर्षक टाका"
+              />
+              {errors.marathiTitle && (
+                <p className="text-red-500 text-sm mt-1">{errors.marathiTitle.message}</p>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Marathi Title */}
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Marathi Title *
-          </label>
-          <input
-            type="text"
-            {...register("marathiTitle", {
-              required: "Marathi Title is required",
-            })}
-            className="w-full border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          {errors.marathiTitle && (
-            <p className="text-red-500 text-xs">
-              {errors.marathiTitle.message}
-            </p>
-          )}
+        {/* Slug & Order Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Configuration</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Slug</label>
+              <input
+                type="text"
+                {...register("slug")}
+                readOnly
+                className="w-full bg-gray-100 text-gray-600 border border-gray-300 rounded px-3 py-2 cursor-not-allowed"
+                placeholder="Auto-generated slug"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Order *</label>
+              <input
+                type="number"
+                {...register("order", {
+                  required: "Order is required",
+                  min: {
+                    value: 1,
+                    message: "Order must be at least 1"
+                  }
+                })}
+                className={`w-full border rounded px-3 py-2 ${errors.order ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="Enter display order"
+              />
+              {errors.order && (
+                <p className="text-red-500 text-sm mt-1">{errors.order.message}</p>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Slug */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Slug</label>
-          <input
-            type="text"
-            {...register("slug")}
-            readOnly
-            className="w-full bg-gray-100 text-gray-600 border rounded-md px-2 py-1.5 text-sm cursor-not-allowed"
-          />
+        {/* Parent & Status Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Category Settings</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Parent Category *</label>
+              <select
+                {...register("parentEntity", {
+                  required: "Please select a parent category",
+                })}
+                className={`w-full border text-black rounded px-3 py-2 ${errors.parentEntity ? 'border-red-500' : 'border-gray-300'
+                  }`}
+              >
+                <option value="">Select parent category</option>
+                {parentEntities.map((p) => (
+                  <option key={p._id} value={p._id}>
+                    {p.title}
+                  </option>
+                ))}
+              </select>
+              {errors.parentEntity && (
+                <p className="text-red-500 text-sm mt-1">{errors.parentEntity.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Status *</label>
+              <select
+                {...register("status", { required: "Status is required" })}
+                className={`w-full border rounded px-3 py-2 ${errors.status ? 'border-red-500' : 'border-gray-300'
+                  }`}
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+              {errors.status && (
+                <p className="text-red-500 text-sm mt-1">{errors.status.message}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Featured Checkbox */}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              {...register("isFeatured")}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label className="text-sm font-medium text-gray-700">Featured Category</label>
+          </div>
         </div>
 
-        {/* Order */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Order *</label>
-          <input
-            type="number"
-            {...register("order", { required: "Order is required" })}
-            className="w-full border rounded-md px-2 py-1.5 text-sm"
-          />
-          {errors.order && (
-            <p className="text-red-500 text-xs">{errors.order.message}</p>
-          )}
+        {/* Description Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Description</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Description (English) *</label>
+              <textarea
+                {...register("enDescription", {
+                  required: "English description is required",
+                  minLength: {
+                    value: 10,
+                    message: "Description must be at least 10 characters long"
+                  },
+                  maxLength: {
+                    value: 500,
+                    message: "Description must not exceed 500 characters"
+                  }
+                })}
+                rows={4}
+                className={`w-full border rounded px-3 py-2 ${errors.enDescription ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="Enter description in english"
+              />
+              {errors.enDescription && (
+                <p className="text-red-500 text-sm mt-1">{errors.enDescription.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Description (मराठी) *</label>
+              <textarea
+                {...register("mrDescription", {
+                  required: "Marathi description is required",
+                  minLength: {
+                    value: 10,
+                    message: "Description must be at least 10 characters long"
+                  },
+                  maxLength: {
+                    value: 500,
+                    message: "Description must not exceed 500 characters"
+                  }
+                })}
+                rows={4}
+                className={`w-full border rounded px-3 py-2 ${errors.mrDescription ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="मराठीत वर्णन टाका"
+              />
+              {errors.mrDescription && (
+                <p className="text-red-500 text-sm mt-1">{errors.mrDescription.message}</p>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Parent Entity */}
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Parent Category *
-          </label>
-          <select
-            {...register("parentEntity", {
-              required: "Please select a parent category",
-            })}
-            className="w-full border rounded-md px-2 py-1.5 text-sm"
+        {/* Image Upload Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Image Upload</h3>
+          <div>
+            <label className="block text-sm font-medium mb-1">Category Image *</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImage(e.target.files[0])}
+              className="w-full border border-gray-300 rounded px-3 py-2 file:mr-4 file:py-1 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {image && (
+              <p className="text-green-600 text-sm mt-1">✅ Image selected: {image.name}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="text-right">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`px-6 py-2 w-full rounded text-white font-medium cursor-pointer ${isSubmitting
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-[#2C498D] hover:bg-[#1e3a7a]'
+              }`}
           >
-            <option value="">Select</option>
-            {parentEntities.map((p) => (
-              <option key={p._id} value={p._id}>
-                {p.englishTitle}
-              </option>
-            ))}
-          </select>
-          {errors.parentEntity && (
-            <p className="text-red-500 text-xs">
-              {errors.parentEntity.message}
-            </p>
-          )}
+            {isSubmitting ? 'Creating Category...' : 'Create Category'}
+          </button>
         </div>
-
-        {/* Status */}
-        <div>
-          <label className="block text-sm font-medium mb-1">Status *</label>
-          <select
-            {...register("status", { required: "Status is required" })}
-            className="w-full border rounded-md px-2 py-1.5 text-sm"
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-          {errors.status && (
-            <p className="text-red-500 text-xs">{errors.status.message}</p>
-          )}
-        </div>
-
-        {/* Featured */}
-        <div className="flex items-center gap-2 mt-5">
-          <input
-            type="checkbox"
-            {...register("isFeatured")}
-            className="w-4 h-4"
-          />
-          <label className="text-sm font-medium">Is Featured</label>
-        </div>
-
-        {/* Image Upload */}
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Upload Image *
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])}
-            className="w-full border rounded-md px-2 py-1.5 text-sm"
-          />
-        </div>
-
-        {/* English Description */}
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium mb-1">
-            English Description *
-          </label>
-          <textarea
-            {...register("enDescription", {
-              required: "English description is required",
-            })}
-            className="w-full border rounded-md px-2 py-1.5 text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          {errors.enDescription && (
-            <p className="text-red-500 text-xs">
-              {errors.enDescription.message}
-            </p>
-          )}
-        </div>
-
-        {/* Marathi Description */}
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium mb-1">
-            Marathi Description *
-          </label>
-          <textarea
-            {...register("mrDescription", {
-              required: "Marathi description is required",
-            })}
-            className="w-full border rounded-md px-2 py-1.5 text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          {errors.mrDescription && (
-            <p className="text-red-500 text-xs">
-              {errors.mrDescription.message}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Submit Button */}
-      <div className="pt-2">
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full py-2 text-sm rounded-md text-white ${
-            loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-          }`}
-        >
-          {loading ? "Submitting..." : "Create Category"}
-        </button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 

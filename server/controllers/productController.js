@@ -3,12 +3,12 @@ const cloudinary = require("../config/cloudinary");
 
 exports.createProduct = async (req, res) => {
   try {
+
     const {
       nameEn,
       nameMr,
       slug,
       category,
-      productDescription,
       tags,
       searchableKeywords,
       sku,
@@ -38,7 +38,7 @@ exports.createProduct = async (req, res) => {
       nameMr,
       slug,
       category,
-      productDescription,
+      // productDescription,
       tags: tags?.split(","),
       searchableKeywords: searchableKeywords?.split(","),
       sku,
@@ -65,7 +65,7 @@ exports.createProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id);
+    const product = await Product.findById(id.toString());
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     const {
@@ -97,13 +97,13 @@ exports.updateProduct = async (req, res) => {
 
     const uploadedImages = req.files?.length
       ? await Promise.all(
-          req.files.map((file) =>
-            cloudinary.uploader.upload(file.path).then((result) => ({
-              url: result.secure_url,
-              publicId: result.public_id,
-            }))
-          )
+        req.files.map((file) =>
+          cloudinary.uploader.upload(file.path).then((result) => ({
+            url: result.secure_url,
+            publicId: result.public_id,
+          }))
         )
+      )
       : product.images;
 
     const updatedData = {
@@ -143,6 +143,7 @@ exports.updateProduct = async (req, res) => {
 exports.softDeleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
+
     const product = await Product.findById(id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 

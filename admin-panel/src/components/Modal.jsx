@@ -29,12 +29,12 @@ const Modal = ({
           >
             <Dialog.Title
               as="h3"
-              className="text-lg font-medium leading-6 text-gray-900 flex justify-between items-center"
+              className="text-lg font-medium leading-6 text-gray-900 flex justify-between items-center "
             >
               {title}
               <button
                 onClick={onClose}
-                className="text-gray-500 hover:text-red-500"
+                className="text-gray-500 hover:text-red-500 cursor-pointer"
               >
                 X
               </button>

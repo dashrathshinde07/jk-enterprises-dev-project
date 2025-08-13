@@ -7,6 +7,8 @@ const {
 
 exports.createFooter = async (req, res) => {
   try {
+
+
     const {
       description_en,
       description_mr,
@@ -49,6 +51,7 @@ exports.createFooter = async (req, res) => {
     });
 
     res.status(201).json(newFooter);
+
   } catch (error) {
     console.error("Create Footer Error:", error);
     res.status(500).json({ message: "Failed to create footer" });
@@ -57,7 +60,7 @@ exports.createFooter = async (req, res) => {
 
 exports.getFooter = async (req, res) => {
   try {
-    const footer = await Footer.findOne();
+    const footer = await Footer.find();
     res.status(200).json(footer);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch footer" });

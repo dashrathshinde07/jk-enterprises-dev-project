@@ -20,6 +20,8 @@ exports.createTrendingProduct = async (req, res) => {
       isFeatured,
     } = req.body;
 
+    console.log("Rani", req.body);
+
     if (!req.file) {
       return res.status(400).json({ message: "Image is required" });
     }
@@ -71,7 +73,10 @@ exports.getTrendingProductById = async (req, res) => {
 // ✅ UPDATE
 exports.updateTrendingProduct = async (req, res) => {
   try {
-    const product = await TrendingProduct.findById(req.params.id);
+
+    const id = req.params.id;
+    const product = await TrendingProduct.findById(id.toString());
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }

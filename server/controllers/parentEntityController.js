@@ -2,10 +2,8 @@ const ParentEntity = require("../models/ParentEntity");
 
 // CREATE ParentEntity
 exports.createParentEntity = async (req, res) => {
-  console.log(" req.body", req.body);
   try {
     const { title, marathiTitle, slug, description, status } = req.body;
-
     const newEntity = new ParentEntity({
       title,
       marathiTitle,

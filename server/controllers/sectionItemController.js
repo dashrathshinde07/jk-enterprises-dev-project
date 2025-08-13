@@ -23,6 +23,8 @@ const createSectionItem = async (req, res) => {
       imagePublicId: imageData.public_id,
     });
 
+    await newItem.save();
+
     res.status(201).json(newItem);
   } catch (err) {
     console.error("Create Error:", err);

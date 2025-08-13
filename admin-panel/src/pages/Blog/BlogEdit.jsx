@@ -1,120 +1,431 @@
+// import React, { useState, useEffect } from "react";
+// import { updateBlog } from "../../api/blogApi";
+// import ImageUploader from "../../components/ImageUploader";
+// import LanguageTabs from "../../components/LanguageTabs";
+
+// const BlogEdit = ({ data, onSuccess }) => {
+//   const [lang, setLang] = useState("en");
+//   const [image, setImage] = useState(null);
+
+//   const [form, setForm] = useState({
+//     title_en: "",
+//     title_mr: "",
+//     description_en: "",
+//     description_mr: "",
+//     category_en: "",
+//     category_mr: "",
+//     authorName: "",
+//     publishedDate: "",
+//   });
+
+//   useEffect(() => {
+//     if (data) {
+//       setForm({
+//         title_en: data.title?.en || "",
+//         title_mr: data.title?.mr || "",
+//         description_en: data.description?.en || "",
+//         description_mr: data.description?.mr || "",
+//         category_en: data.category?.en || "",
+//         category_mr: data.category?.mr || "",
+//         authorName: data.author.name || "",
+//         publishedDate: data.publishedDate?.substring(0, 10) || "",
+//       });
+//       setImage(data?.imageUrl || null);
+//     }
+//   }, [data]);
+
+//   const handleChange = (e) => {
+//     setForm({ ...form, [e.target.name]: e.target.value });
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     await updateBlog(data._id, { ...form, image });
+//     onSuccess();
+//   };
+
+//   return (
+//     <form onSubmit={handleSubmit} className="space-y-4">
+//       {/* <LanguageTabs lang={lang} setLang={setLang} className='bg-red-600' /> */}
+//       <LanguageTabs lang={lang} setLang={setLang} />
+//       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//         <div>
+//           <label className="block text-sm font-medium">Title</label>
+//           <input
+//             type="text"
+//             name={`title_${lang}`}
+//             value={form[`title_${lang}`]}
+//             onChange={handleChange}
+//             className="w-full border rounded px-3 py-2"
+//           />
+//         </div>
+//         <div>
+//           <label className="block text-sm font-medium">Category</label>
+//           <input
+//             type="text"
+//             name={`category_${lang}`}
+//             value={form[`category_${lang}`]}
+//             onChange={handleChange}
+//             className="w-full border rounded px-3 py-2"
+//           />
+//         </div>
+//       </div>
+
+//       <div>
+//         <label className="block text-sm font-medium">Description</label>
+//         <textarea
+//           name={`description_${lang}`}
+//           value={form[`description_${lang}`]}
+//           onChange={handleChange}
+//           rows={3}
+//           className="w-full border rounded px-3 py-2"
+//         />
+//       </div>
+
+//       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//         <div>
+//           <label className="block text-sm font-medium">Author</label>
+//           <input
+//             type="text"
+//             name="authorName"
+//             value={form.authorName}
+//             onChange={handleChange}
+//             className="w-full border rounded px-3 py-2"
+//           />
+//         </div>
+//         <div>
+//           <label className="block text-sm font-medium">Published Date</label>
+//           <input
+//             type="date"
+//             name="publishedDate"
+//             value={form.publishedDate}
+//             onChange={handleChange}
+//             className="w-full border rounded px-3 py-2"
+//           />
+//         </div>
+//       </div>
+
+//       <ImageUploader image={image} setImage={setImage} />
+
+//       <div className="text-right">
+//         <button
+//           type="submit"
+//           className="bg-[#2C498D] text-white px-4 py-2 rounded"
+//         >
+//           Update
+//         </button>
+//       </div>
+//     </form>
+//   );
+// };
+
+// export default BlogEdit;
+
+
 import React, { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { updateBlog } from "../../api/blogApi";
 import ImageUploader from "../../components/ImageUploader";
-import LanguageTabs from "../../components/LanguageTabs";
+import { toast } from "react-toastify";
 
 const BlogEdit = ({ data, onSuccess }) => {
-  const [lang, setLang] = useState("en");
   const [image, setImage] = useState(null);
-  const [form, setForm] = useState({
-    title_en: "",
-    title_mr: "",
-    description_en: "",
-    description_mr: "",
-    category_en: "",
-    category_mr: "",
-    authorName: "",
-    publishedDate: "",
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setValue,
+  } = useForm({
+    defaultValues: {
+      title_en: "",
+      title_mr: "",
+      description_en: "",
+      description_mr: "",
+      content_en: "",
+      content_mr: "",
+      category_en: "",
+      category_mr: "",
+      authorName: "",
+    }
   });
 
   useEffect(() => {
     if (data) {
-      setForm({
-        title_en: data.title_en || "",
-        title_mr: data.title_mr || "",
-        description_en: data.description_en || "",
-        description_mr: data.description_mr || "",
-        category_en: data.category_en || "",
-        category_mr: data.category_mr || "",
-        authorName: data.authorName || "",
-        publishedDate: data.publishedDate?.substring(0, 10) || "",
-      });
-      setImage(data.image || null);
+      // Set form values using setValue for better form control
+      setValue("title_en", data.title?.en || data.title_en || "");
+      setValue("title_mr", data.title?.mr || data.title_mr || "");
+      setValue("description_en", data.description?.en || data.description_en || "");
+      setValue("description_mr", data.description?.mr || data.description_mr || "");
+      setValue("content_en", data.content?.en || data.content_en || "");
+      setValue("content_mr", data.content?.mr || data.content_mr || "");
+      setValue("category_en", data.category?.en || data.category_en || "");
+      setValue("category_mr", data.category?.mr || data.category_mr || "");
+      setValue("authorName", data.author?.name || data.authorName || "");
+
+      setImage(data?.imageUrl || null);
     }
-  }, [data]);
+  }, [data, setValue]);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const onSubmit = async (formData) => {
+    try {
+      await updateBlog(data._id, { ...formData, image });
+      toast.success('✅ Blog updated successfully!');
+      onSuccess();
+    } catch (error) {
+      console.error("Error updating blog:", error);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await updateBlog(data._id, { ...form, image });
-    onSuccess();
+      // Axios-style error response check
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(`❌ ${error.response.data.message}`);
+      } else if (error.message) {
+        toast.error(`❌ ${error.message}`);
+      } else {
+        toast.error('❌ Something went wrong while updating the blog.');
+      }
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <LanguageTabs lang={lang} setLang={setLang} />
+    <div className="bg-white rounded-lg shadow-md overflow-hidden max-h-[75vh] overflow-y-auto p-3">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium">Title</label>
-          <input
-            type="text"
-            name={`title_${lang}`}
-            value={form[`title_${lang}`]}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          />
+        {/* Title Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Title</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Title (English) *</label>
+              <input
+                type="text"
+                {...register("title_en", {
+                  required: "English title is required",
+                  minLength: {
+                    value: 3,
+                    message: "Title must be at least 3 characters long"
+                  }
+                })}
+                className={`w-full border rounded px-3 py-2 ${errors.title_en ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="Enter title in english"
+              />
+              {errors.title_en && (
+                <p className="text-red-500 text-sm mt-1">{errors.title_en.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Title (मराठी) *</label>
+              <input
+                type="text"
+                {...register("title_mr", {
+                  required: "Marathi title is required",
+                  minLength: {
+                    value: 3,
+                    message: "Title must be at least 3 characters long"
+                  }
+                })}
+                className={`w-full border rounded px-3 py-2 ${errors.title_mr ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="मराठीत शीर्षक टाका"
+              />
+              {errors.title_mr && (
+                <p className="text-red-500 text-sm mt-1">{errors.title_mr.message}</p>
+              )}
+            </div>
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium">Category</label>
-          <input
-            type="text"
-            name={`category_${lang}`}
-            value={form[`category_${lang}`]}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          />
+
+        {/* Category Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Category</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Category (English) *</label>
+              <input
+                type="text"
+                {...register("category_en", {
+                  required: "English category is required",
+                  minLength: {
+                    value: 2,
+                    message: "Category must be at least 2 characters long"
+                  }
+                })}
+                className={`w-full border rounded px-3 py-2 ${errors.category_en ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="Enter category in english"
+              />
+              {errors.category_en && (
+                <p className="text-red-500 text-sm mt-1">{errors.category_en.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Category (मराठी) *</label>
+              <input
+                type="text"
+                {...register("category_mr", {
+                  required: "Marathi category is required",
+                  minLength: {
+                    value: 2,
+                    message: "Category must be at least 2 characters long"
+                  }
+                })}
+                className={`w-full border rounded px-3 py-2 ${errors.category_mr ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="मराठीत श्रेणी टाका"
+              />
+              {errors.category_mr && (
+                <p className="text-red-500 text-sm mt-1">{errors.category_mr.message}</p>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium">Description</label>
-        <textarea
-          name={`description_${lang}`}
-          value={form[`description_${lang}`]}
-          onChange={handleChange}
-          rows={3}
-          className="w-full border rounded px-3 py-2"
-        />
-      </div>
+        {/* Description Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Description</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Description (English) *</label>
+              <textarea
+                {...register("description_en", {
+                  required: "English description is required",
+                  minLength: {
+                    value: 10,
+                    message: "Description must be at least 10 characters long"
+                  },
+                  maxLength: {
+                    value: 500,
+                    message: "Description must not exceed 500 characters"
+                  }
+                })}
+                rows={4}
+                className={`w-full border rounded px-3 py-2 ${errors.description_en ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="Enter description in english"
+              />
+              {errors.description_en && (
+                <p className="text-red-500 text-sm mt-1">{errors.description_en.message}</p>
+              )}
+            </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium">Author</label>
-          <input
-            type="text"
-            name="authorName"
-            value={form.authorName}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          />
+            <div>
+              <label className="block text-sm font-medium mb-1">Description (मराठी) *</label>
+              <textarea
+                {...register("description_mr", {
+                  required: "Marathi description is required",
+                  minLength: {
+                    value: 10,
+                    message: "Description must be at least 10 characters long"
+                  },
+                  maxLength: {
+                    value: 500,
+                    message: "Description must not exceed 500 characters"
+                  }
+                })}
+                rows={4}
+                className={`w-full border rounded px-3 py-2 ${errors.description_mr ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="मराठीत वर्णन टाका"
+              />
+              {errors.description_mr && (
+                <p className="text-red-500 text-sm mt-1">{errors.description_mr.message}</p>
+              )}
+            </div>
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium">Published Date</label>
-          <input
-            type="date"
-            name="publishedDate"
-            value={form.publishedDate}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          />
+
+        {/* Content Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Content</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Content (English) *</label>
+              <textarea
+                {...register("content_en", {
+                  required: "English content is required",
+                  minLength: {
+                    value: 50,
+                    message: "Content must be at least 50 characters long"
+                  }
+                })}
+                rows={8}
+                className={`w-full border rounded px-3 py-2 ${errors.content_en ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="Enter full content in english"
+              />
+              {errors.content_en && (
+                <p className="text-red-500 text-sm mt-1">{errors.content_en.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Content (मराठी) *</label>
+              <textarea
+                {...register("content_mr", {
+                  required: "Marathi content is required",
+                  minLength: {
+                    value: 50,
+                    message: "Content must be at least 50 characters long"
+                  }
+                })}
+                rows={8}
+                className={`w-full border rounded px-3 py-2 ${errors.content_mr ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="मराठीत संपूर्ण मजकूर टाका"
+              />
+              {errors.content_mr && (
+                <p className="text-red-500 text-sm mt-1">{errors.content_mr.message}</p>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
 
-      <ImageUploader image={image} setImage={setImage} />
+        {/* Author Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Author Details</h3>
+          <div>
+            <label className="block text-sm font-medium mb-1">Author Name *</label>
+            <input
+              type="text"
+              {...register("authorName", {
+                required: "Author name is required",
+                minLength: {
+                  value: 2,
+                  message: "Author name must be at least 2 characters long"
+                },
+                pattern: {
+                  value: /^[a-zA-Z\s]+$/,
+                  message: "Author name should only contain letters and spaces"
+                }
+              })}
+              className={`w-full border rounded px-3 py-2 ${errors.authorName ? 'border-red-500' : 'border-gray-300'
+                }`}
+              placeholder="Enter author name"
+            />
+            {errors.authorName && (
+              <p className="text-red-500 text-sm mt-1">{errors.authorName.message}</p>
+            )}
+          </div>
+        </div>
 
-      <div className="text-right">
-        <button
-          type="submit"
-          className="bg-[#2C498D] text-white px-4 py-2 rounded"
-        >
-          Update
-        </button>
-      </div>
-    </form>
+        <ImageUploader image={image} setImage={setImage} />
+
+        <div className="text-right">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`px-6 py-2 rounded text-white font-medium cursor-pointer ${isSubmitting
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-[#2C498D] hover:bg-[#1e3a7a]'
+              }`}
+          >
+            {isSubmitting ? 'Updating...' : 'Update Blog'}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

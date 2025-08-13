@@ -9,22 +9,19 @@ exports.createReview = async (req, res) => {
   try {
     const { name, rating, reviewDate, reviewText_en, reviewText_mr } = req.body;
 
-    let imageUrl = null;
-    let cloudinaryId = null;
-
-    if (req.file) {
-      const result = await uploadImageToCloudinary(req.file.path, "reviews");
-      imageUrl = result.secure_url;
-      cloudinaryId = result.public_id;
+    if (!req.file) {
+      return res.status(400).json({ message: "Image is required" });
     }
+
+    const { url, public_id } = await uploadImageToCloudinary(req.file.path);
 
     const newReview = await Review.create({
       name,
       rating,
       reviewDate,
       reviewText: { en: reviewText_en, mr: reviewText_mr },
-      profileImage: imageUrl,
-      cloudinaryId,
+      profileImage: url,
+      cloudinaryId: public_id,
     });
 
     res.status(201).json(newReview);
@@ -54,6 +51,38 @@ exports.getReviewById = async (req, res) => {
     res.status(200).json(review);
   } catch (err) {
     console.error("Get Review By ID Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ✅ UPDATE review by ID
+exports.updateReviewById = async (req, res) => {
+  try {
+    const { name, rating, reviewDate, reviewText_en, reviewText_mr } = req.body;
+
+    const review = await Review.findById(req.params.id);
+    if (!review) return res.status(404).json({ message: "Review not found" });
+
+
+    if (req.file) {
+      await deleteImageFromCloudinary(review.cloudinaryId);
+      const { url, public_id } = await uploadImageToCloudinary(req.file.path);
+      review.profileImage = url;
+      review.cloudinaryId = public_id;
+    }
+
+    review.name = name || review.name;
+    review.rating = rating || review.rating;
+    review.reviewDate = reviewDate || review.reviewDate;
+    review.reviewText = {
+      en: reviewText_en || review.reviewText.en,
+      mr: reviewText_mr || review.reviewText.mr,
+    };
+
+    const updatedReview = await review.save();
+    res.status(200).json(updatedReview);
+  } catch (err) {
+    console.error("Update Review Error:", err);
     res.status(500).json({ message: err.message });
   }
 };

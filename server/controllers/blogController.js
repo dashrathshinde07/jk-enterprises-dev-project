@@ -29,6 +29,8 @@ exports.createBlog = async (req, res) => {
       authorName,
     } = req.body;
 
+    console.log(req.body);
+
     if (!req.file)
       return res.status(400).json({ message: "Image is required" });
 

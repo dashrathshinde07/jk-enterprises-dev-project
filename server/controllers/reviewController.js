@@ -63,7 +63,6 @@ exports.updateReviewById = async (req, res) => {
     const review = await Review.findById(req.params.id);
     if (!review) return res.status(404).json({ message: "Review not found" });
 
-
     if (req.file) {
       await deleteImageFromCloudinary(review.cloudinaryId);
       const { url, public_id } = await uploadImageToCloudinary(req.file.path);
